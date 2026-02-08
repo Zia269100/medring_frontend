@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
@@ -9,17 +8,24 @@ export default function RingHandler() {
 
   useEffect(() => {
     async function check() {
-      const res = await api.get(`/ring/${token}`);
+      try {
+        const res = await api.get(`/ring/${token}`);
 
-      if (res.data.newUser) {
-        nav("/register");
-      } else {
-        nav("/emergency"); // default common view
+        if (res.data.newUser) {
+          nav("/register");
+        } else {
+          nav(`/emergency/${token}`); // ✅ pass token
+        }
+
+      } catch (err) {
+        console.error(err);
+        nav("/register"); // fallback safe
       }
     }
 
-    check();
-  }, []);
+    if (token) check();
 
-  return <p>Loading...</p>;
+  }, [token]);
+
+  return <p>Checking ring...</p>;
 }
