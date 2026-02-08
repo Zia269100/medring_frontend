@@ -2,30 +2,64 @@ import { useState } from "react";
 import api from "../services/api";
 
 export default function Register() {
-  const [form, setForm] = useState({});
 
-  const submit = async () => {
-    await api.post("/register-ring", form);
-    alert("Registered!");
-  };
+const [form, setForm] = useState({
+token: "",
+name: "",
+age: "",
+bloodGroup: "",
+emergencyContact: ""
+});
 
-  return (
-    <div className="card">
-      <h2>Register Ring</h2>
+const submit = async () => {
+await api.post("/register-ring", form);
+alert("Registered successfully");
+};
 
-      <input placeholder="Name"
-        onChange={e=>setForm({...form,name:e.target.value})}/>
+return ( <div className="card">
 
-      <input placeholder="Age"
-        onChange={e=>setForm({...form,age:e.target.value})}/>
+```
+  <h2>Register Ring</h2>
 
-      <input placeholder="Blood Group"
-        onChange={e=>setForm({...form,bloodGroup:e.target.value})}/>
+  <input
+    placeholder="Ring Token"
+    onChange={(e) =>
+      setForm({ ...form, token: e.target.value })
+    }
+  />
 
-      <input placeholder="Emergency Contact"
-        onChange={e=>setForm({...form,emergencyContact:e.target.value})}/>
+  <input
+    placeholder="Name"
+    onChange={(e) =>
+      setForm({ ...form, name: e.target.value })
+    }
+  />
 
-      <button onClick={submit}>Save</button>
-    </div>
-  );
+  <input
+    placeholder="Age"
+    onChange={(e) =>
+      setForm({ ...form, age: e.target.value })
+    }
+  />
+
+  <input
+    placeholder="Blood Group"
+    onChange={(e) =>
+      setForm({ ...form, bloodGroup: e.target.value })
+    }
+  />
+
+  <input
+    placeholder="Emergency Contact"
+    onChange={(e) =>
+      setForm({ ...form, emergencyContact: e.target.value })
+    }
+  />
+
+  <button onClick={submit}>Register</button>
+
+</div>
+```
+
+);
 }
