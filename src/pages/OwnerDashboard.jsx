@@ -1,27 +1,87 @@
-import React from "react";
-import { useEffect, useState } from "react";
-import api from "../services/api";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import api from "../services/api";
 
 export default function OwnerDashboard() {
 
-const { token } = useParams();
-const [data, setData] = useState(null);
+  const { token } = useParams();
 
-useEffect(() => {
-async function load() {
-const res = await api.get(`/ring/${token}`);
-setData(res.data);
-}
+  const [user, setUser] = useState(null);
 
-```
-load();
-```
+  const [form, setForm] = useState({
+    conditions: "",
+    allergies: "",
+    medications: "",
+    notes: ""
+  });
 
-}, [token]);
+  /* =========================
+  LOAD USER
+  ========================= */
 
-if (!data) return <p>Loading...</p>;
+  useEffect(() => {
+    async function load() {
+      const res = await api.get(`/ring/${token}`);
+      setUser(res.data.user);
+    }
+    load();
+  }, [token]);
 
-return ( <div className="card"> <h2>Owner Dashboard</h2> <pre>{JSON.stringify(data, null, 2)}</pre> </div>
-);
+  /* =========================
+  SAVE MEDICAL
+  ========================= */
+
+  const save = async () => {
+
+    await api.post("/medical/update", {
+      userId: user._id,
+      conditions: form.conditions.split(","),
+      allergies: form.allergies.split(","),
+      medications: form.medications.split(","),
+      notes: form.notes
+    });
+
+    alert("Medical info saved ✅");
+  };
+
+  if (!user) return <p>Loading...</p>;
+
+  return (
+    <div className="card">
+
+      <h2>Owner Dashboard</h2>
+      <p><b>{user.name}</b></p>
+
+      <input
+        placeholder="Conditions (diabetes, epilepsy)"
+        onChange={(e) =>
+          setForm({ ...form, conditions: e.target.value })
+        }
+      />
+
+      <input
+        placeholder="Allergies (milk, penicillin)"
+        onChange={(e) =>
+          setForm({ ...form, allergies: e.target.value })
+        }
+      />
+
+      <input
+        placeholder="Medications"
+        onChange={(e) =>
+          setForm({ ...form, medications: e.target.value })
+        }
+      />
+
+      <textarea
+        placeholder="Extra notes"
+        onChange={(e) =>
+          setForm({ ...form, notes: e.target.value })
+        }
+      />
+
+      <button onClick={save}>Save Medical Info</button>
+
+    </div>
+  );
 }
