@@ -1,66 +1,91 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import api from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+  const nav = useNavigate();
 
-const [form, setForm] = useState({
-token: "",
-name: "",
-age: "",
-bloodGroup: "",
-emergencyContact: ""
-});
+  const [form, setForm] = useState({
+    token: "",
+    name: "",
+    age: "",
+    bloodGroup: "",
+    emergencyContact: ""
+  });
 
-const submit = async () => {
-await api.post("/register-ring", form);
-alert("Registered successfully");
-};
+  const [loading, setLoading] = useState(false);
 
-return ( <div className="card">
+  const submit = async (e) => {
+    e.preventDefault(); // ✅ VERY IMPORTANT
 
+    try {
+      setLoading(true);
 
-  <h2>Register Ring</h2>
+      await api.post("/register-ring", form);
 
-  <input
-    placeholder="Ring Token"
-    onChange={(e) =>
-      setForm({ ...form, token: e.target.value })
+      alert("Registered successfully ✅");
+
+      nav(`/owner/${form.token}`); // auto redirect
+
+    } catch (err) {
+      console.error(err);
+      alert("Registration failed ❌ Check backend");
+    } finally {
+      setLoading(false);
     }
-  />
+  };
 
-  <input
-    placeholder="Name"
-    onChange={(e) =>
-      setForm({ ...form, name: e.target.value })
-    }
-  />
+  return (
+    <div className="card">
+      <h2>Register Ring</h2>
 
-  <input
-    placeholder="Age"
-    onChange={(e) =>
-      setForm({ ...form, age: e.target.value })
-    }
-  />
+      <form onSubmit={submit}>
 
-  <input
-    placeholder="Blood Group"
-    onChange={(e) =>
-      setForm({ ...form, bloodGroup: e.target.value })
-    }
-  />
+        <input
+          placeholder="Ring Token"
+          value={form.token}
+          onChange={(e) =>
+            setForm({ ...form, token: e.target.value })
+          }
+        />
 
-  <input
-    placeholder="Emergency Contact"
-    onChange={(e) =>
-      setForm({ ...form, emergencyContact: e.target.value })
-    }
-  />
+        <input
+          placeholder="Name"
+          value={form.name}
+          onChange={(e) =>
+            setForm({ ...form, name: e.target.value })
+          }
+        />
 
-  <button onClick={submit}>Register</button>
+        <input
+          placeholder="Age"
+          value={form.age}
+          onChange={(e) =>
+            setForm({ ...form, age: e.target.value })
+          }
+        />
 
-</div>
+        <input
+          placeholder="Blood Group"
+          value={form.bloodGroup}
+          onChange={(e) =>
+            setForm({ ...form, bloodGroup: e.target.value })
+          }
+        />
 
+        <input
+          placeholder="Emergency Contact"
+          value={form.emergencyContact}
+          onChange={(e) =>
+            setForm({ ...form, emergencyContact: e.target.value })
+          }
+        />
 
-);
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register"}
+        </button>
+
+      </form>
+    </div>
+  );
 }
