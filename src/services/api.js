@@ -1,8 +1,10 @@
+import axios from "axios";
+
 const api = axios.create({
-  baseURL: "https://medring-backend.onrender.com"
+  baseURL: "https://medring-backend.onrender.com/api"
 });
 
-api.interceptors.request.use(config => {
+api.interceptors.request.use((config) => {
   const d = localStorage.getItem("doctorToken");
   const a = localStorage.getItem("adminToken");
 
@@ -11,3 +13,5 @@ api.interceptors.request.use(config => {
 
   return config;
 });
+
+export default api;
