@@ -3,29 +3,67 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function RingHandler() {
+
   const { token } = useParams();
   const nav = useNavigate();
 
   useEffect(() => {
-    async function check() {
-      try {
-        const res = await api.get(`/ring/${token}`);
 
-        if (res.data.newUser) {
-          nav("/register");
-        } else {
-          nav(`/emergency/${token}`); // ✅ pass token
+    async function check() {
+
+      try {
+
+        /* =============================
+        LOCAL ROLE CHECK (FAST)
+        ============================= */
+
+        const ownerToken = localStorage.getItem("ownerToken");
+        const doctorToken = localStorage.getItem("doctorToken");
+
+        // 🔥 OWNER
+        if (ownerToken === token) {
+          nav(`/owner/${token}`);
+          return;
         }
 
+        // 🔥 DOCTOR
+        if (doctorToken) {
+          nav(`/doctor?token=${token}`);
+          return;
+        }
+
+
+        /* =============================
+        SERVER CHECK
+        ============================= */
+
+        const res = await api.get(`/ring/${token}`);
+
+        // new ring → register
+        if (res?.data?.newUser) {
+          nav("/register");
+          return;
+        }
+
+        // default → emergency
+        nav(`/emergency/${token}`);
+
       } catch (err) {
-        console.error(err);
-        nav("/register"); // fallback safe
+
+        console.error("RingHandler error:", err);
+
+        // safe fallback
+        nav(`/emergency/${token}`);
       }
     }
 
     if (token) check();
 
-  }, [token]);
+  }, [token, nav]);
 
-  return <p>Checking ring...</p>;
+  return (
+    <div style={{ textAlign: "center", marginTop: 50 }}>
+      Checking ring...
+    </div>
+  );
 }
