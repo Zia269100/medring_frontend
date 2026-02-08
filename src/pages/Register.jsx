@@ -21,7 +21,10 @@ export default function Register() {
     try {
       setLoading(true);
 
-      await api.post("/register-ring", form);
+      await api.post("/register-ring", {
+        ...form,
+        token: form.token.trim().toLowerCase() // 🔥 FIX
+      });
 
       alert("Registered successfully ✅");
 
