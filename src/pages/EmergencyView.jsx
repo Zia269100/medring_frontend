@@ -11,23 +11,99 @@ export default function EmergencyView() {
 
   const [plan, setPlan] = useState(null);
   const [situation, setSituation] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-
-  /* =============================
+  /* ======================
   SPEAK
-  ============================= */
+  ====================== */
   const speak = (text) => {
+    if (!text) return;
+
     const msg = new SpeechSynthesisUtterance(text);
     msg.rate = 0.9;
     msg.lang = i18n.language === "hi" ? "hi-IN" : "en-US";
+
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(msg);
   };
 
+  /* ======================
+  FETCH PLAN (ONLY AFTER SITUATION)
+  ====================== */
+  useEffect(() => {
 
-  /* =============================
+    if (!situation) return;
+
+    async function loadPlan() {
+      try {
+        setLoading(true);
+
+        const res = await api.get(
+          `/ring/${token}?situation=${situation}`
+        );
+
+        const newPlan =
+          res?.data?.plan ||
+          {
+            level: "LOW",
+            steps: ["No instructions available"]
+          };
+
+        setPlan(newPlan);
+
+        await localforage.setItem("lastPlan", newPlan);
+
+      } catch {
+
+        const cached = await localforage.getItem("lastPlan");
+        if (cached) setPlan(cached);
+
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadPlan();
+
+  }, [token, situation]);
+
+  /* ======================
+  AUTO VOICE
+  ====================== */
+  useEffect(() => {
+    if (plan?.steps?.length)
+      speak(plan.steps.join(". "));
+  }, [plan, i18n.language]);
+
+  /* ======================
+  INCIDENT SMS
+  ====================== */
+  const sendIncident = () => {
+
+    navigator.geolocation.getCurrentPosition((pos) => {
+
+      const location =
+        `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+
+      api.post("/incident", {
+        token,
+        situation,
+        location
+      });
+
+    });
+  };
+
+  /* ======================
+  CALL
+  ====================== */
+  const callContact = () => {
+    window.location.href = "tel:9876543210";
+  };
+
+  /* ======================
   SHARE LOCATION
-  ============================= */
+  ====================== */
   const shareLocation = () => {
     navigator.geolocation.getCurrentPosition((pos) => {
       const url =
@@ -36,84 +112,43 @@ export default function EmergencyView() {
     });
   };
 
+  /* ======================
+  STEP 1 → ASK FIRST
+  ====================== */
+  if (!situation) {
+    return (
+      <div className="card">
+        <h2>🚨 What happened?</h2>
 
-  /* =============================
-  CALL CONTACT
-  ============================= */
-  const callContact = () => {
-    window.location.href = "tel:9876543210";
-  };
+        <button onClick={() => setSituation("unconscious")}>
+          Unconscious
+        </button>
 
+        <button onClick={() => setSituation("seizure")}>
+          Seizure
+        </button>
 
-  /* =============================
-  SEND INCIDENT (SMS trigger)
-  ============================= */
-  const sendIncident = (sit) => {
-    navigator.geolocation.getCurrentPosition((pos) => {
+        <button onClick={() => setSituation("accident")}>
+          Accident
+        </button>
+      </div>
+    );
+  }
 
-      const location =
-        `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+  /* ======================
+  LOADING
+  ====================== */
+  if (loading) return <p style={{ textAlign: "center" }}>Loading...</p>;
 
-      api.post("/incident", {
-        token,
-        situation: sit,
-        location
-      });
+  /* ======================
+  STEP 2 → SHOW PLAN
+  ====================== */
+  if (!plan) return null;
 
-    });
-  };
-
-
-  /* =============================
-  FETCH PLAN (ONLINE + OFFLINE)
-  ============================= */
-  useEffect(() => {
-
-    async function load() {
-      try {
-        const res = await api.get(`/ring/${token}`);
-
-        const newPlan = res?.data?.plan || {
-          level: "LOW",
-          steps: ["No medical instructions available"]
-        };
-
-        setPlan(newPlan);
-
-        await localforage.setItem("lastPlan", newPlan);
-
-      } catch {
-        const cached = await localforage.getItem("lastPlan");
-        if (cached) setPlan(cached);
-      }
-    }
-
-    load();
-
-  }, [token]);
-
-
-  /* =============================
-  AUTO VOICE
-  ============================= */
-  useEffect(() => {
-    if (plan?.steps?.length)
-      speak(plan.steps.join(". "));
-  }, [plan, i18n.language]);
-
-
-  if (!plan)
-    return <p style={{ textAlign: "center" }}>Loading...</p>;
-
-
-  /* =============================
-  UI
-  ============================= */
   return (
     <div className="card">
 
       <h2>🚨 {t("emergency")}</h2>
-
       <h3>{t("risk")} : {plan.level}</h3>
 
       <div style={{ margin: "15px 0" }}>
@@ -122,8 +157,6 @@ export default function EmergencyView() {
         ))}
       </div>
 
-
-      {/* ACTIONS */}
       <button className="btn-danger" onClick={callContact}>
         {t("call")}
       </button>
@@ -132,16 +165,13 @@ export default function EmergencyView() {
         {t("share")}
       </button>
 
+      <button
+        style={{ marginTop: 12 }}
+        onClick={sendIncident}
+      >
+        Send Alert + SMS
+      </button>
 
-      {/* 🔥 EMERGENCY TYPE BUTTONS */}
-      <div style={{ marginTop: 20 }}>
-        <button onClick={() => sendIncident("unconscious")}>Unconscious</button>
-        <button onClick={() => sendIncident("seizure")}>Seizure</button>
-        <button onClick={() => sendIncident("accident")}>Accident</button>
-      </div>
-
-
-      {/* LANGUAGE */}
       <div style={{ marginTop: 12 }}>
         <button onClick={() => i18n.changeLanguage("en")}>EN</button>
         <button onClick={() => i18n.changeLanguage("hi")} style={{ marginLeft: 8 }}>

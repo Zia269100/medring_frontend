@@ -5,6 +5,7 @@ import api from "../services/api";
 export default function RingHandler() {
 
   const { token } = useParams();
+  const cleanToken = token?.trim().toLowerCase();
   const nav = useNavigate();
 
   useEffect(() => {
