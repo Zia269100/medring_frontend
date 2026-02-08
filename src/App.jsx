@@ -21,16 +21,15 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/owner/:token" element={<OwnerDashboard />} />
-        <Route path="/emergency" element={<EmergencyView />} />
-        <Route path="/doctor" element={<DoctorDashboard />} />
-        <Route path="/r/:token" element={<RingHandler />} />
         <Route path="/r/:token" element={<EmergencyView />} />
-        <Route path="/doctor/register" element={<DoctorRegister />} />
+
         <Route path="/doctor/login" element={<DoctorLogin />} />
+        <Route path="/doctor/register" element={<DoctorRegister />} />
+        <Route path="/doctor" element={<DoctorDashboard />} />
+
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/analytics" element={<AdminAnalytics />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
       </Routes>
     </BrowserRouter>
   );
