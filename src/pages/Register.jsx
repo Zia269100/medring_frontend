@@ -18,7 +18,7 @@ alert("Registered successfully");
 
 return ( <div className="card">
 
-```
+
   <h2>Register Ring</h2>
 
   <input
@@ -59,7 +59,7 @@ return ( <div className="card">
   <button onClick={submit}>Register</button>
 
 </div>
-```
+
 
 );
 }
