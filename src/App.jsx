@@ -6,7 +6,6 @@ import Register from "./pages/Register";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import EmergencyView from "./pages/EmergencyView";
 import DoctorDashboard from "./pages/DoctorDashboard";
-import RingHandler from "./pages/RingHandler";
 import DoctorRegister from "./pages/DoctorRegister";
 import DoctorLogin from "./pages/DoctorLogin";
 import AdminPanel from "./pages/AdminPanel";
@@ -19,17 +18,25 @@ export default function App() {
       <Navbar />
 
       <Routes>
+
+        {/* home */}
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/r/:token" element={<EmergencyView />} />
 
+        {/* ring */}
+        <Route path="/r/:token" element={<EmergencyView />} />
+        <Route path="/owner/:token" element={<OwnerDashboard />} />
+
+        {/* doctor */}
         <Route path="/doctor/login" element={<DoctorLogin />} />
         <Route path="/doctor/register" element={<DoctorRegister />} />
         <Route path="/doctor" element={<DoctorDashboard />} />
 
+        {/* admin */}
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/analytics" element={<AdminAnalytics />} />
+
       </Routes>
     </BrowserRouter>
   );
