@@ -98,7 +98,7 @@ export default function EmergencyView() {
   CALL
   ====================== */
   const callContact = () => {
-    window.location.href = "tel:9876543210";
+    window.location.href = "tel:8692827954";
   };
 
   /* ======================
